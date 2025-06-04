@@ -10,6 +10,5 @@ __pycache__/
 *.pyc
 *.pyo
 
-all_data/
 hegnn/results/
 wandb/
