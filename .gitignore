@@ -1,0 +1,15 @@
+/hegnn/all_data/data
+/hegnn/all_data/custom_data/
+/hegnn/zinc_experiments/wandb
+/hegnn/srg/wandb
+/hegnn.egg-info/
+hegnn.egg-info/
+
+# Ignore Python bytecode files
+__pycache__/
+*.pyc
+*.pyo
+
+all_data/
+hegnn/results/
+wandb/

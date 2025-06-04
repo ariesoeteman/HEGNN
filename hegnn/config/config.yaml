@@ -1,0 +1,41 @@
+data:
+  dataset: "zinc"        # Literal: "zinc" or "srg"
+  n_hops: -1             # Radius for HESGNN, -1 for full graph (HEGNN)
+  storage_size: 100      # Package size in HDF5 format
+  data_size: 'subset'    # For ZINC (literal: full, subset (12k) or smallsubset (5k))
+  stored_input: true     # Store all individualized graphs in HDF5 and use stored data.
+  overwrite: false       # Overwrite existing HDF5 files
+  srg:
+    n_isomorphisms: 15   # Number of isomorphisms for SRG dataset
+    name: sr261034       # Name of the SRG dataset
+
+model: "HEGNN"           # Currently the only option is "HEGNN"
+
+model_params:
+  hidden_dim: 16
+  mode: "original"       # One of "original", or "splitbatch" to save memory
+  pna_params:
+    aggregators: ['sum']
+    scalers: ['identity']
+  num_layers: 10
+  different_layers: false
+  layer: "ZINCGINConv"   # One of the layers in layers.py
+  dropout: 0.0
+  batch_norm: true
+  residual: false
+  uid_residual: false    # Residual connection for unique node identifiers
+  cycle_residual: true   # Residual connection for cycle counts
+  depth: 0               # Depth of the HEGNN, 0 for GNN
+  gradient_fraction: 0.1 # For splitbatch, fraction of the branches to use for gradients
+  pool_subgraphs: true   # Pool over subgraphs
+  depth_merge: "concat"  # How to merge the features from next HEGNN layer, "concat" or "sum"
+
+n_epochs: 10
+batch_size: 100
+print_log: false         # Print log every epoch
+wandb: false
+learning_rate:
+  factor: 0.5
+  patience: 50
+weight_decay: 0.0001
+cycles: null             # Cycle counts to add, filled in by experiment files if needed

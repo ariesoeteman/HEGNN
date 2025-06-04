@@ -1,0 +1,96 @@
+import copy
+import json
+import os
+import pdb
+import time
+from itertools import product
+
+from hegnn.config.parse_config import load_config, load_parser
+from hegnn.globals import results_dir
+from hegnn.run_zinc_store_data import run_zinc
+
+args = load_parser()
+config = load_config()
+config.wandb = False
+config.data.data_size = "subset"
+config.n_epochs = 600
+
+config.batch_size = 1000
+config.model_params.num_layers = 6
+config.print_log = False
+config.model_params.layer = "GCNConv"
+config.data.stored_input = True
+
+config.model_params.depth = 0
+config.data.overwrite = False
+
+dropout_iter = [0.0, 0.2]
+hidden_dim_iter = [256, 128]
+weight_decay_iter = [0.0]
+learning_rate_factor_iter = [0.5]
+
+all_results = {}
+
+if args.experiment_name is None:
+    raise ValueError("Please specify an experiment name.")
+else:
+    experiment_name = args.experiment_name
+
+# experiment_name = "varying_n_hops_experiment"
+all_results_storage = []
+all_results = {}
+
+grid = [dropout_iter, hidden_dim_iter, weight_decay_iter, learning_rate_factor_iter]
+n_runs = 10
+i = 0
+for settings in product(*grid):
+    result_dict = {}
+    for j in range(n_runs):
+        dropout, hidden_dim, weight_decay, learning_rate = settings
+        cur_config = copy.deepcopy(config)
+
+        cur_config.model_params.dropout = dropout
+        cur_config.model_params.hidden_dim = hidden_dim
+        cur_config.learning_rate.factor = learning_rate
+        cur_config.weight_decay = weight_decay
+
+        cur_config.data.input_dim = cur_config.model_params.hidden_dim
+        cur_config.run_name = f"ZINCGIN_run_{j}_depth_0_hidden_{hidden_dim}_dropout_{dropout}_weight_decay_{weight_decay}_learning_rate_{learning_rate}"
+
+        start_time = time.time()
+        val_loss, train_loss, test_loss = run_zinc(cur_config)
+        cur_config.model_params.pna_params.degrees = None
+        result_dict = {
+            "config": cur_config.to_dict(),
+            "run": j,
+            "results": {
+                "val_loss": float(val_loss),
+                "train_loss": float(train_loss),
+                "test_loss": float(test_loss),
+                "time": int(time.time() - start_time),
+            },
+        }
+        all_results_storage.append(result_dict)
+
+        sorted_results = sorted(
+            all_results_storage, key=lambda x: x["results"]["val_loss"]
+        )
+        for result_dict in sorted_results:
+            print("\n")
+            run_name = result_dict["config"]["run_name"]
+            val_loss = result_dict["results"]["val_loss"]
+            train_loss = result_dict["results"]["train_loss"]
+            test_loss = result_dict["results"]["test_loss"]
+            runtime = result_dict["results"]["time"]
+            print(
+                f"{run_name}: val_loss={val_loss}, train_loss={train_loss}, test_loss={test_loss}, time={int(runtime)}"
+            )
+
+        # Save results to a JSON file
+        # ########################
+        results_file = os.path.join(results_dir, experiment_name + ".json")
+        os.makedirs(os.path.dirname(results_file), exist_ok=True)
+        with open(results_file, "w") as f:
+            json.dump(all_results_storage, f, indent=4)
+        print(f"Results saved to {results_file}")
+        # ###########################3
