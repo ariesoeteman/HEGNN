@@ -8,16 +8,24 @@ If you use this code and require further clarification or documentation, please 
 This code is released under the MIT License. See ./LICENSE for details.
 
 ## Citation
-If you use this code in your work, please cite our paper LINK TO ARXIV:
-Arie Soeteman and Balder ten Cate
-Logical Expressiveness of Graph Neural Networks with Hierarchical Node Individualization
+If you use this code in your work, please cite our paper on [arxiv](https://www.arxiv.org/abs/2506.13911):
 
 Bibtex:
-ADD BIBTEX
+ <pre lang="bibtex"> @misc{soeteman2025logicalexpressivenessgraphneural,
+  title        = {Logical Expressiveness of Graph Neural Networks with Hierarchical Node Individualization},
+  author       = {Arie Soeteman and Balder ten Cate},
+  year         = {2025},
+  eprint       = {2506.13911},
+  archivePrefix= {arXiv},
+  primaryClass = {cs.LG},
+  url          = {https://arxiv.org/abs/2506.13911}
+}</pre>
+
+</details>
 
 ## Features
 - Support for node and edge features
-- Subgraph generation and chunked storage
+- Nested subgraph generation with individualization and chunked storage
 - Experiments on ZINC and Strongly Regular Graphs
 
 ## Dependencies
@@ -75,7 +83,3 @@ All configurations can be adjusted via the command line.
 - `tests/` — Unit tests
 - `utils/` — Utility functions
 - `zinc_experiments/` — ZINC experiment scripts
-
-## Citation and License
-
-Not yet applicable.
